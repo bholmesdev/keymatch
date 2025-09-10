@@ -74,6 +74,29 @@ function normalizeKey(key: string): string {
 }
 
 /**
+ * Derive a normalized base key from a KeyboardEvent, preferring `code` for letters/digits.
+ * This ensures Option/Alt dead-key compositions on macOS (e.g. Option+O => 'ø')
+ * still match the intended base key ('o').
+ */
+function normalizedEventKey(event: KeyboardEvent): string {
+  // Prefer physical key for letters and digits
+  const code = (event as any).code as string | undefined;
+  if (code) {
+    if (/^Key[A-Z]$/.test(code)) {
+      // e.g. KeyO => 'o'
+      return code.slice(3).toLowerCase();
+    }
+    if (/^Digit[0-9]$/.test(code)) {
+      // e.g. Digit5 => '5'
+      return code.slice(5);
+    }
+  }
+
+  // Fallback to the reported key, with Electron-style normalization
+  return normalizeKey(event.key);
+}
+
+/**
  * Checks if a KeyboardEvent matches an Electron accelerator string
  * 
  * @example
@@ -87,7 +110,7 @@ function normalizeKey(key: string): string {
 export function keymatch(event: KeyboardEvent, matchString: string): boolean {
   const { ctrl, alt, shift, meta, key } = parseMatchString(matchString);
 
-  return normalizeKey(event.key) === key &&
+  return normalizedEventKey(event) === key &&
     event.ctrlKey === ctrl &&
     event.altKey === alt &&
     event.shiftKey === shift &&
