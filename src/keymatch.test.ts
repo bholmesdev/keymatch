@@ -4,6 +4,7 @@ import { keymatch } from './keymatch';
 // Helper function to create a mock KeyboardEvent
 function createKeyboardEvent(options: {
   key: string;
+  code?: string;
   ctrlKey?: boolean;
   metaKey?: boolean;
   altKey?: boolean;
@@ -11,6 +12,7 @@ function createKeyboardEvent(options: {
 }): KeyboardEvent {
   return {
     key: options.key,
+    code: options.code,
     ctrlKey: options.ctrlKey ?? false,
     metaKey: options.metaKey ?? false,
     altKey: options.altKey ?? false,
@@ -204,6 +206,24 @@ describe('keyboard-shortcut', () => {
       });
     });
 
+    describe('normalizedEventKey behavior', () => {
+      it('extracts and normalizes a letter from event.code like "KeyA"', () => {
+        const event = createKeyboardEvent({ key: 'x', code: 'KeyA' });
+        expect(keymatch(event, 'a')).toBe(true);
+      });
+
+      // TODO: support special characters
+      it.skip('extracts a digit from event.code like "Digit1"', () => {
+        const event = createKeyboardEvent({ key: '!', code: 'Digit1', shiftKey: true });
+        expect(keymatch(event, '!')).toBe(true);
+      });
+
+      it('falls back to normalizeKey when event.code is not a letter or digit', () => {
+        const event = createKeyboardEvent({ key: 'ArrowUp', code: 'ArrowUp' });
+        expect(keymatch(event, 'Up')).toBe(true);
+      });
+    });
+
     describe('edge cases', () => {
       it('should handle empty accelerator string', () => {
         const event = createKeyboardEvent({ key: 'a' });
@@ -297,6 +317,22 @@ describe('keyboard-shortcut', () => {
 
       const event = createKeyboardEvent({ key: 'Delete', ctrlKey: true });
       expect(keymatch(event, 'CmdOrCtrl+Delete')).toBe(true);
+    });
+  });
+
+  describe('key matching with base code and composed characters', () => {
+    it("matches a key string when event.code represents the base key (e.g., 'KeyO' matches 'o')", () => {
+      const event = createKeyboardEvent({ key: 'o', code: 'KeyO' });
+      expect(keymatch(event, 'o')).toBe(true);
+    });
+
+    it('handles composed character when Option is held (Option+O => ø) while code is KeyO', () => {
+      Object.defineProperty(navigator, 'platform', {
+        value: 'MacIntel',
+        configurable: true,
+      });
+      const event = createKeyboardEvent({ key: 'ø', code: 'KeyO', altKey: true });
+      expect(keymatch(event, 'Option+O')).toBe(true);
     });
   });
 
