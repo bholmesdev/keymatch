@@ -78,9 +78,7 @@ function normalizeKey(key: string): string {
  * This ensures Option/Alt dead-key compositions on macOS (e.g. Option+O => 'ø')
  * still match the intended base key ('o').
  */
-function normalizedEventKey(event: KeyboardEvent): string {
-  // Prefer physical key for letters and digits
-  const code = (event as any).code as string | undefined;
+function normalizedEventKey({ code, key }: KeyboardEvent): string {
   if (code) {
     if (/^Key[A-Z]$/.test(code)) {
       // e.g. KeyO => 'o'
@@ -93,7 +91,7 @@ function normalizedEventKey(event: KeyboardEvent): string {
   }
 
   // Fallback to the reported key, with Electron-style normalization
-  return normalizeKey(event.key);
+  return normalizeKey(key);
 }
 
 /**
