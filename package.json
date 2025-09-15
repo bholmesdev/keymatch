@@ -1,41 +1,42 @@
 {
-  "name": "keymatch",
-  "type": "module",
-  "version": "1.0.5",
-  "description": "Utility for matching browser keyboard events across platforms",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "prepublishOnly": "pnpm build"
-  },
-  "keywords": [
-    "keyboard",
-    "shortcuts",
-    "accelerator",
-    "electron",
-    "keybinding"
-  ],
-  "author": "",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/bholmesdev/keymatch.git"
-  },
-  "homepage": "https://github.com/bholmesdev/keymatch",
-  "bugs": {
-    "url": "https://github.com/bholmesdev/keymatch/issues"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "jsdom": "^26.1.0",
-    "typescript": "^5.0.0",
-    "vitest": "^1.0.0"
-  }
+	"name": "keymatch",
+	"type": "module",
+	"version": "1.0.5",
+	"description": "Utility for matching browser keyboard events across platforms",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"check": "biome check",
+		"build": "pnpm check && tsc",
+		"dev": "tsc --watch",
+		"test": "vitest",
+		"prepublishOnly": "pnpm build"
+	},
+	"keywords": [
+		"keyboard",
+		"shortcuts",
+		"accelerator",
+		"electron",
+		"keybinding"
+	],
+	"author": "",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/bholmesdev/keymatch.git"
+	},
+	"homepage": "https://github.com/bholmesdev/keymatch",
+	"bugs": {
+		"url": "https://github.com/bholmesdev/keymatch/issues"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.4",
+		"@types/node": "^20.0.0",
+		"jsdom": "^26.1.0",
+		"typescript": "^5.0.0",
+		"vitest": "^1.0.0"
+	}
 }
