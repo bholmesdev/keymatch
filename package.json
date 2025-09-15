@@ -1,7 +1,7 @@
 {
   "name": "keymatch",
   "type": "module",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Utility for matching browser keyboard events across platforms",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
