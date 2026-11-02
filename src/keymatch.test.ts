@@ -263,6 +263,122 @@ describe('keyboard-shortcut', () => {
 		});
 	});
 
+	describe('keyboard layouts', () => {
+		describe('Dvorak', () => {
+			it('matches the key that types "b" even though its code is KeyN', () => {
+				const event = createKeyboardEvent({
+					key: 'b',
+					code: 'KeyN',
+					metaKey: true,
+				});
+				expect(keymatch(event, 'CmdOrCtrl+B')).toBe(true);
+			});
+
+			it('does not match by the key position when the layout types something else', () => {
+				// On Dvorak the key at QWERTY's B position types "x"
+				const event = createKeyboardEvent({
+					key: 'x',
+					code: 'KeyB',
+					metaKey: true,
+				});
+				expect(keymatch(event, 'CmdOrCtrl+B')).toBe(false);
+			});
+		});
+
+		describe('QWERTZ', () => {
+			it('matches the key that types "z" even though its code is KeyY', () => {
+				const event = createKeyboardEvent({
+					key: 'z',
+					code: 'KeyY',
+					metaKey: true,
+				});
+				expect(keymatch(event, 'CmdOrCtrl+Z')).toBe(true);
+				expect(keymatch(event, 'CmdOrCtrl+Y')).toBe(false);
+			});
+		});
+
+		describe('QWERTY', () => {
+			it('matches a letter when key and code agree', () => {
+				const event = createKeyboardEvent({
+					key: 'b',
+					code: 'KeyB',
+					metaKey: true,
+				});
+				expect(keymatch(event, 'CmdOrCtrl+B')).toBe(true);
+			});
+		});
+
+		describe('Cyrillic', () => {
+			it('falls back to the key position when the layout types a non-ASCII letter', () => {
+				// key is Cyrillic es (U+0441), not Latin "c"
+				const event = createKeyboardEvent({
+					key: 'с',
+					code: 'KeyC',
+					metaKey: true,
+				});
+				expect(keymatch(event, 'CmdOrCtrl+C')).toBe(true);
+			});
+		});
+
+		describe('Alt held', () => {
+			it('matches by the key position, not the layout character (Windows Dvorak Alt+F)', () => {
+				// On Dvorak the key at QWERTY's Y position types "f"
+				const event = createKeyboardEvent({
+					key: 'f',
+					code: 'KeyY',
+					altKey: true,
+				});
+				expect(keymatch(event, 'Alt+Y')).toBe(true);
+				expect(keymatch(event, 'Alt+F')).toBe(false);
+			});
+		});
+
+		describe('punctuation on a letter key', () => {
+			it('falls back to the key position (Dvorak comma on KeyW)', () => {
+				const event = createKeyboardEvent({
+					key: ',',
+					code: 'KeyW',
+					metaKey: true,
+				});
+				expect(keymatch(event, 'CmdOrCtrl+W')).toBe(true);
+				expect(keymatch(event, 'CmdOrCtrl+,')).toBe(false);
+			});
+		});
+
+		describe('Shift', () => {
+			it('matches an uppercase letter by the layout character', () => {
+				const event = createKeyboardEvent({
+					key: 'B',
+					code: 'KeyN',
+					metaKey: true,
+					shiftKey: true,
+				});
+				expect(keymatch(event, 'CmdOrCtrl+Shift+B')).toBe(true);
+			});
+		});
+
+		describe('digits', () => {
+			it('QWERTY digit unchanged', () => {
+				const event = createKeyboardEvent({
+					key: '5',
+					code: 'Digit5',
+					metaKey: true,
+				});
+				expect(keymatch(event, 'CmdOrCtrl+5')).toBe(true);
+			});
+
+			it('falls back to the key position for a Shifted digit (Shift+2 => @)', () => {
+				const event = createKeyboardEvent({
+					key: '@',
+					code: 'Digit2',
+					metaKey: true,
+					shiftKey: true,
+				});
+				expect(keymatch(event, 'CmdOrCtrl+Shift+2')).toBe(true);
+			});
+		});
+	});
+
 	describe('platform-specific behavior', () => {
 		it('should use Cmd on macOS for CmdOrCtrl', () => {
 			Object.defineProperty(navigator, 'platform', {
