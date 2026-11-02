@@ -76,11 +76,31 @@ function normalizeKey(key: string): string {
 }
 
 /**
- * Derive a normalized base key from a KeyboardEvent, preferring `code` for letters/digits.
- * This ensures Option/Alt dead-key compositions on macOS (e.g. Option+O => 'ø')
- * still match the intended base key ('o').
+ * Derive a normalized base key from a KeyboardEvent.
+ *
+ * Letters and digits follow the character the active keyboard layout produces
+ * (`key`), so on Dvorak, Colemak or AZERTY a shortcut spelled `CmdOrCtrl+B`
+ * fires from the key that types "b", not from the key at QWERTY's B position.
+ *
+ * The physical key (`code`) is used only when:
+ * - Alt is held (Option dead keys such as Option+O => 'ø'), so Alt shortcuts
+ *   still match by key position on every layout.
+ * - the key produces something other than an ASCII letter or digit on a letter
+ *   or digit key: a non-ASCII letter (Cyrillic), punctuation (',' on Dvorak's
+ *   KeyW, so Cmd+, there still matches `CmdOrCtrl+W`), or the symbol on a
+ *   Shifted digit key ('@' on Digit2).
+ *
+ * Like native macOS apps, non-Latin layouts fall back to the key position.
+ *
+ * Anything else (Enter, arrows, Delete, `Dead`, `Unidentified`) goes to
+ * `normalizeKey(key)` as before.
  */
-function normalizedEventKey({ code, key }: KeyboardEvent): string {
+function normalizedEventKey({ code, key, altKey }: KeyboardEvent): string {
+	if (!altKey && /^[a-zA-Z0-9]$/.test(key)) {
+		// e.g. 'B' on Dvorak => 'b'
+		return key.toLowerCase();
+	}
+
 	if (code) {
 		if (/^Key[A-Z]$/.test(code)) {
 			// e.g. KeyO => 'o'
